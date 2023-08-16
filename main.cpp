@@ -43,8 +43,7 @@ Vector3 Subtract(const Vector3 m1, const Vector3 m2) {
 //最近接点
 Vector3 ClosestPoint(const Vector3 point, const Segment segment) {
 
-	//Projectで省略してもよかったけど
-	//こっちの方が自分の為になると思った
+	
 	//A..PO
 	Vector3 Vector3A = Subtract(point, segment.origin);
 	Vector3 Vector3B = Subtract(segment.diff, segment.origin);
@@ -143,8 +142,7 @@ void DrawSegment(const Segment& segment, const Matrix4x4& viewMatrix, const Matr
 
 
 bool IsCollisionSpherePlane(const SpherePloperty s1, Plane plane) {
-	//kを求めたいんですよね・・
-
+	
 	//q=c-kn
 	////球の中心点
 	Vector3 c = s1.center;
