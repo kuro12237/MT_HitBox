@@ -22,7 +22,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector3 rotate = { 0.26f,0.0f,0.0f };
 
 	float radius = 0.2f;
-	Vector3 localCoodinate = { 0.0f,6.0f,6.0f };
+	Vector3 localCoodinate = { 0.0f,0.0f,1.0f };
 	SpherePloperty sphere = { localCoodinate,radius };
 
 	const int WINDOW_SIZE_WIDTH = 1280;
