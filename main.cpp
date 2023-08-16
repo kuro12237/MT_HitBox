@@ -84,6 +84,28 @@ Vector3 Project(const Vector3 a, const Vector3 b) {
 
 	return Vector3C;
 }
+
+
+bool IsCollision(const SpherePloperty v1, SpherePloperty v2) {
+	float x = (v2.center.x - v1.center.x);
+	float y = (v2.center.y - v1.center.y);
+	float z = (v2.center.z - v1.center.z);
+
+	float resultPos = (x * x) + (y * y) + (z * z);
+
+	float resultRadious = v1.radius + v2.radius;
+
+	bool Flag = false;
+
+	if (resultPos <= (resultRadious * resultRadious)) {
+		Flag = true;
+	}
+
+	return Flag;
+
+
+}
+
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -99,9 +121,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector3 translate = { 0.0f,3.0f,-9.50f };
 	Vector3 rotate = { 0.26f,0.0f,0.0f };
 
-	float radius = 0.2f;
+	float radius = 1.0f;
 	Vector3 localCoodinate = { 0.0f,0.0f,1.0f };
 	SpherePloperty sphere = { localCoodinate,radius };
+
+	Vector3 SpherePos = { 0.0f,0.0f,1.0f };
+
+	SpherePloperty Sphere2 = { SpherePos,2.0f };
+
 
 	const int WINDOW_SIZE_WIDTH = 1280;
 	const int WINDOW_SIZE_HEIGHT = 720;
@@ -135,107 +162,43 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//ビューポート
 		Matrix4x4 viewportMatrix = MatrixTransform::MakeViewportMatrix(0, 0, float(WINDOW_SIZE_WIDTH), float(WINDOW_SIZE_HEIGHT), 0.0f, 1.0f);
 
+		unsigned int color = WHITE;
 
-		//線
-		//正射影ベクトルと最近接点
-		project = Project(Subtract(point, segment.origin), segment.diff);
-		closestPoint = ClosestPoint(point, segment);
-		Matrix4x4 WorldMatrixSegmentOrigin = MatrixTransform::MakeAffineMatrix({ 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, segment.origin);
-		Matrix4x4 WorldMatrixSegmentDiff = MatrixTransform::MakeAffineMatrix({ 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, segment.diff);
-
-
-		Matrix4x4 worldViewProjectionMatrixSegmentOrigin = MatrixTransform::Multiply(WorldMatrixSegmentOrigin, MatrixTransform::Multiply(viewMatrix, projectionMatrix));
-		Matrix4x4 worldViewProjectionMatrixSegmentDiff = MatrixTransform::Multiply(WorldMatrixSegmentDiff, MatrixTransform::Multiply(viewMatrix, projectionMatrix));
-
-
-		Vector3 ndcVerticesSegmentOrigin = Transform(segment.origin, worldViewProjectionMatrixSegmentOrigin);
-		Vector3 ndcVerticesSegmentDiff = Transform(segment.diff, worldViewProjectionMatrixSegmentDiff);
-
-
-		Vector3 start = Transform(ndcVerticesSegmentOrigin, viewportMatrix);
-		Vector3 end = Transform(ndcVerticesSegmentDiff, viewportMatrix);
-
-
-
-		//Point(資料だとP)
-		Matrix4x4 WorldMatrixPoint = MatrixTransform::MakeAffineMatrix({ 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, point);
-
-		Matrix4x4 worldViewProjectionMatrixPoint = MatrixTransform::Multiply(WorldMatrixPoint, MatrixTransform::Multiply(viewMatrix, projectionMatrix));
-
-		Vector3 ndcVerticesPoint = Transform(point, worldViewProjectionMatrixPoint);
-
-		Vector3 pointCoodinate = Transform(ndcVerticesPoint, viewportMatrix);
-
-
-		//Projection
-		Matrix4x4 WorldMatrixProject = MatrixTransform::MakeAffineMatrix({ 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, project);
-
-
-		Matrix4x4 worldViewProjectionMatrixProject = MatrixTransform::Multiply(WorldMatrixProject,MatrixTransform:: Multiply(viewMatrix, projectionMatrix));
-
-
-		Vector3 ndcVerticesProject = Transform(project, worldViewProjectionMatrixProject);
-
-
-		Vector3 projectCoodinate = Transform(VectorTransform::Add(ndcVerticesSegmentOrigin, ndcVerticesProject), viewportMatrix);
-
-
-
+		if (IsCollision(sphere,Sphere2 )) {
+			color = RED;
+		}
+	
 		///
 		/// ↑更新処理ここまで
 		///
 
+		DrawGrid(viewMatrix, projectionMatrix, viewportMatrix);
 
+		DrawSphere(sphere, projectionMatrix, viewportMatrix,viewMatrix, color);
+
+		DrawSphere(Sphere2, projectionMatrix, viewportMatrix, viewMatrix, color);
 
 		///
 		/// ↓描画処理ここから
 		///
-		DrawGrid(viewMatrix, projectionMatrix, viewportMatrix);
-		Novice::DrawLine(
-			int(start.x),
-			int(start.y),
-			int(end.x),
-			int(end.y), WHITE);
 
-		//SegmentOrigin
-		Novice::DrawEllipse(
-			int(start.x),
-			int(start.y),
-			int(50.0f),
-			int(50.0f), 0.0f, BLUE, kFillModeSolid);
-
-
-		//VectorOについて
-		Novice::DrawLine(
-			int(start.x),
-			int(start.y),
-			int(pointCoodinate.x),
-			int(pointCoodinate.y), BLACK);
-
-		//VectorOについて
-		Novice::DrawEllipse(
-			int(pointCoodinate.x),
-			int(pointCoodinate.y),
-			50, 50, 0.0f, RED, kFillModeSolid);
-
-
-		//DrawSphere(sphere, viewMatrix, viewportMatrix,BLACK);
-
-		ImGui::Begin("Window");
+		ImGui::Begin("camera");
 		ImGui::DragFloat3("cameraTranslate", &translate.x, 0.01f);
 		ImGui::DragFloat3("cameraRotate", &rotate.x, 0.01f);
-		ImGui::DragFloat3("spherePos", &sphere.center.x, 0.01f);
-
-		ImGui::DragFloat("SphereRadius", &sphere.radius, 0.01f);
+	
 		ImGui::End();
 
-		ImGui::Begin("line");
-		ImGui::DragFloat3("point", &point.x, 0.01f);
-		ImGui::DragFloat3("Segment origin", &segment.origin.x, 0.01f);
-		ImGui::DragFloat3("Segmen difft", &segment.diff.x, 0.01f);
+		ImGui::Begin("Sphre1");
+		ImGui::DragFloat3("spherePos", &sphere.center.x, 0.1f);
 
-		ImGui::InputFloat3("Project", &project.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
+		ImGui::DragFloat("SphereRadius", &sphere.radius, 0.1f);
+		ImGui::End();
 
+
+		ImGui::Begin("Sphre2");
+		ImGui::DragFloat3("spherePos", &Sphere2.center.x, 0.1f);
+
+		ImGui::DragFloat("SphereRadius", &Sphere2.radius, 0.1f);
 		ImGui::End();
 
 		///

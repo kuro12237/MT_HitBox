@@ -11,4 +11,4 @@ struct SpherePloperty {
 	float radius;
 };
 
-void DrawSphere(const SpherePloperty& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, unsigned int color);
+void DrawSphere(const SpherePloperty& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, const Matrix4x4& viewMatrix, unsigned int color);

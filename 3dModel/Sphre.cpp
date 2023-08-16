@@ -1,52 +1,80 @@
 ﻿#include "Sphre.h"
 
 
-void DrawSphere(const SpherePloperty& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, unsigned int color)
+void DrawSphere(const SpherePloperty& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, const Matrix4x4& viewMatrix, unsigned int color)
 {
 	//Cg2球
-
-	const uint32_t kSubDivision = 30;
-	const float kLonEvery = 2.0f * (float)std::numbers::pi / float(kSubDivision);
-	const float kLatEvery = (float)std::numbers::pi / float(kSubDivision);
-
-	for (uint32_t latIndex = 0; latIndex < kSubDivision; ++latIndex) {
-		float lat = -1.0f * (float)std::numbers::pi / 2.0f + kLatEvery * latIndex;
-
-		for (uint32_t lonIndex = 0; lonIndex < kSubDivision; ++lonIndex) {
-			float lon = lonIndex * kLonEvery;
-
-			Vector3 v1, v2, v3;
-		
-			v1 = { sphere.radius * std::cosf(lat) * std::cosf(lon), sphere.radius * std::sinf(lat), sphere.radius * std::cosf(lat) * std::sinf(lon) };
-			v1 = VectorTransform::Add(v1, sphere.center);
-			v2 = { sphere.radius * std::cosf(lat + kLatEvery) * std::cosf(lon), sphere.radius * std::sinf(lat + kLatEvery), sphere.radius * std::cosf(lat + kLatEvery) * std::sinf(lon) };
-			v2 = VectorTransform::Add(v2, sphere.center);
-			v3 = { sphere.radius * std::cosf(lat) * std::cosf(lon + kLonEvery), sphere.radius * std::sinf(lat), sphere.radius * std::cosf(lat) * std::sinf(lon + kLonEvery) };
-			v3 = VectorTransform::Add(v3, sphere.center);
-
-			v1 = Transform(v1, viewProjectionMatrix);
-			v1 = Transform(v1, viewportMatrix);
-			v2 = Transform(v2, viewProjectionMatrix);
-			v2 = Transform(v2, viewportMatrix);
-			v3 = Transform(v3, viewProjectionMatrix);
-			v3 = Transform(v3, viewportMatrix);
+//分割数
+	const uint32_t SUBDIVISION = 30;
+	//lat
+	const float LON_EVERY =2.0f* (float)std::numbers::pi / float(SUBDIVISION);
+	//lon
+	const float LAT_EVERY = (float)std::numbers::pi / float(SUBDIVISION);
 
 
+
+
+	for (uint32_t latIndex = 0; latIndex < SUBDIVISION; ++latIndex) {
+		float lat = -1.0f * (float)(float)std::numbers::pi / 2.0f + LAT_EVERY * latIndex;
+
+		for (uint32_t lonIndex = 0; lonIndex < SUBDIVISION; ++lonIndex) {
+			float lon = lonIndex * LON_EVERY;
+
+			//world座標でのabcを求める
+			//acはxz平面(phi,lon)
+			//abがxy平面(theta,lat)
+			Vector3 a, b, c;
+
+			//Local
+
+			a = { sphere.radius * std::cosf(lat) * std::cosf(lon), sphere.radius * std::sinf(lat), sphere.radius * std::cosf(lat) * std::sinf(lon) };
+			a = VectorTransform::Add(a, sphere.center);
+			b = { sphere.radius * std::cosf(lat + LAT_EVERY) * std::cosf(lon), sphere.radius * std::sinf(lat + LAT_EVERY), sphere.radius * std::cosf(lat + LAT_EVERY) * std::sinf(lon) };
+			b = VectorTransform::Add(b, sphere.center);
+			c = { sphere.radius * std::cosf(lat) * std::cosf(lon + LON_EVERY), sphere.radius * std::sinf(lat), sphere.radius * std::cosf(lat) * std::sinf(lon + LON_EVERY) };
+			c = VectorTransform::Add(c, sphere.center);
+
+			Matrix4x4 WorldMatrixA = MatrixTransform::MakeAffineMatrix({ 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, sphere.center);
+			Matrix4x4 WorldMatrixB = MatrixTransform::MakeAffineMatrix({ 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, sphere.center);
+			Matrix4x4 WorldMatrixC = MatrixTransform::MakeAffineMatrix({ 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, sphere.center);
+
+
+			////ワールドへ
+
+			Matrix4x4 worldViewProjectionMatrixA = MatrixTransform::Multiply(WorldMatrixA, MatrixTransform::Multiply(viewMatrix, viewProjectionMatrix));
+			Matrix4x4 worldViewProjectionMatrixB = MatrixTransform::Multiply(WorldMatrixB, MatrixTransform::Multiply(viewMatrix, viewProjectionMatrix));
+			Matrix4x4 worldViewProjectionMatrixC = MatrixTransform::Multiply(WorldMatrixC, MatrixTransform::Multiply(viewMatrix, viewProjectionMatrix));
+			viewMatrix;
+
+			Vector3 ndcVerticesA = Transform(a,worldViewProjectionMatrixA);
+			Vector3 ndcVerticesB = Transform(b,worldViewProjectionMatrixB);
+			Vector3 ndcVerticesC = Transform(c,worldViewProjectionMatrixC);
+			ndcVerticesA = Transform(ndcVerticesA, viewportMatrix);
+			ndcVerticesB = Transform(ndcVerticesB, viewportMatrix);
+			ndcVerticesC = Transform(ndcVerticesC, viewportMatrix);
+
+
+			//ab
 			Novice::DrawLine(
-				int(v1.x), int(v1.y),
-				int(v2.x), int(v2.y),
-				color
-			);
+				int(ndcVerticesA.x),
+				int(ndcVerticesA.y),
+				int(ndcVerticesB.x),
+				int(ndcVerticesB.y), color);
 
+			////ac
 			Novice::DrawLine(
-				int(v1.x), int(v1.y),
-				int(v3.x), int(v3.y),
-				color
-			);
+				int(ndcVerticesC.x),
+				int(ndcVerticesC.y),
+				int(ndcVerticesA.x),
+				int(ndcVerticesA.y), color);
+
+
 
 		}
-	}
 
+
+
+	}
 
 
 }
