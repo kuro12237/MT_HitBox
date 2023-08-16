@@ -193,7 +193,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		unsigned int color = WHITE;
 
-		if (IsCollisionSpherePlane(sphere, planeCoodinate) == true) {
+		if (IsCollisionSpherePlane(sphere, planeCoodinate)) {
 			color = RED;
 		}
 		else {
