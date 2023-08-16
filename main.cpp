@@ -109,9 +109,7 @@ bool IsCollision(const SpherePloperty v1, SpherePloperty v2) {
 
 
 bool IsCollisionSpherePlane(const SpherePloperty s1, Plane plane) {
-	//kを求めたいんですよね・・
 
-	//q=c-kn
 	////球の中心点
 	Vector3 c = s1.center;
 
@@ -133,7 +131,75 @@ bool IsCollisionSpherePlane(const SpherePloperty s1, Plane plane) {
 	}
 }
 
-// Windowsアプリでのエントリーポイント(main関数)
+
+void DrawSegment(const Segment& segment, const Matrix4x4& viewMatrix, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, unsigned int color) {
+
+	//引数はローカル
+	Vector3 localSegmentOrigin = segment.origin;
+	Vector3 localSegmentDiff = segment.diff;
+
+
+	//ワールド
+	Matrix4x4 worldSegmentOrigin = MatrixTransform::MakeAffineMatrix({ 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, localSegmentOrigin);
+	Matrix4x4 worldSegmentDiff = MatrixTransform::MakeAffineMatrix({ 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, localSegmentDiff);
+
+
+	Matrix4x4 worldViewProjectionSegmentOrigin = MatrixTransform::Multiply(worldSegmentOrigin, MatrixTransform::Multiply(viewMatrix, viewProjectionMatrix));
+	Matrix4x4 worldViewProjectionSegmentDiff = MatrixTransform::Multiply(worldSegmentDiff, MatrixTransform::Multiply(viewMatrix, viewProjectionMatrix));
+
+
+	Vector3 ndcSegmentOrigin = Transform(localSegmentOrigin, worldViewProjectionSegmentOrigin);
+	Vector3 ndcSegmentDiff = Transform(localSegmentDiff, worldViewProjectionSegmentDiff);
+
+
+
+	Vector3 screenSegmentOrigin = Transform(ndcSegmentOrigin, viewportMatrix);
+	Vector3 screenSegmentDiff = Transform(ndcSegmentDiff, viewportMatrix);
+
+
+	Novice::DrawLine(
+		int(screenSegmentOrigin.x),
+		int(screenSegmentOrigin.y),
+		int(screenSegmentDiff.x),
+		int(screenSegmentDiff.y), color);
+
+
+}
+//線と平面の衝突判定
+bool IsColliionPlaneSegment(const Segment& segment, const Plane& plane) {
+
+
+	Vector3 o = segment.origin;
+	Vector3 b = segment.diff;
+	float d = plane.distance;
+	Vector3 n = Normalize(plane.normal);
+
+
+	float bn = b.x*n.x+b.y*n.y+b.z*n.z;
+
+	//平行だったので✕
+	if (bn == 0.0f) {
+		return false;
+	}
+
+
+	float dot = o.x * n.x + o.y * n.y + o.z * n.z;
+	//tを求める
+	float t = (d - dot) / bn;
+
+	//Segmentなので
+	if (t > 0.0f)
+	{
+	
+			return true;
+	}
+	
+	
+	return false;
+	
+}
+
+
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// ライブラリの初期化
@@ -193,21 +259,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		unsigned int color = WHITE;
 
-		if (IsCollisionSpherePlane(sphere, planeCoodinate)) {
+		if (IsColliionPlaneSegment(segment, planeCoodinate)) {
 			color = RED;
 		}
-		else {
-			color = WHITE;
-		}
+		
 		///
 		/// ↑更新処理ここまで
 		///
 
 		DrawGrid(viewMatrix, projectionMatrix, viewportMatrix);
 
-		DrawSphere(sphere, projectionMatrix, viewportMatrix,viewMatrix, color);
 
 		//DrawSphere(Sphere2, projectionMatrix, viewportMatrix, viewMatrix, color);
+		DrawSegment(segment, viewMatrix, projectionMatrix, viewportMatrix, color);
 
 		DrawPlane(planeCoodinate, viewMatrix, projectionMatrix, viewportMatrix, WHITE);
 		///
@@ -220,16 +284,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 		ImGui::End();
 
-		ImGui::Begin("Sphre1");
-		ImGui::DragFloat3("spherePos", &sphere.center.x, 0.1f);
 
-		ImGui::DragFloat("SphereRadius", &sphere.radius, 0.1f);
+		ImGui::Begin("Segment");
+		ImGui::DragFloat3("Origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("Diff", &segment.diff.x, 0.01f);
 		ImGui::End();
-
 
 		ImGui::Begin("Plane");
 		ImGui::DragFloat3("Plane.Normal", &planeCoodinate.normal.x, 0.01f);
-		//planeCoodinate.normal = Normalize(planeCoodinate.normal);
+		planeCoodinate.normal = Normalize(planeCoodinate.normal);
 		ImGui::DragFloat("distance", &planeCoodinate.distance, 0.01f);
 		ImGui::End();
 
