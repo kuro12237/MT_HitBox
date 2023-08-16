@@ -3,7 +3,7 @@
 #include"3dModel/Sphre.h"
 #include"ImGuiManager.h"
 #include"3dModel/Plane.h"
-
+#include"3dModel/Triangle.h"
 const char kWindowTitle[] = "LE2B_14_サカキバラ_イブキ";
 
 struct Segment {
@@ -107,6 +107,40 @@ bool IsCollision(const SpherePloperty v1, SpherePloperty v2) {
 
 }
 
+void DrawSegment(const Segment& segment, const Matrix4x4& viewMatrix, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, unsigned int color) {
+
+	//引数はローカル
+	Vector3 localSegmentOrigin = segment.origin;
+	Vector3 localSegmentDiff = segment.diff;
+
+
+	//ワールド
+	Matrix4x4 worldSegmentOrigin =MatrixTransform::MakeAffineMatrix({ 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, localSegmentOrigin);
+	Matrix4x4 worldSegmentDiff = MatrixTransform::MakeAffineMatrix({ 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, localSegmentDiff);
+
+
+	Matrix4x4 worldViewProjectionSegmentOrigin = MatrixTransform::Multiply(worldSegmentOrigin, MatrixTransform::Multiply(viewMatrix, viewProjectionMatrix));
+	Matrix4x4 worldViewProjectionSegmentDiff = MatrixTransform::Multiply(worldSegmentDiff, MatrixTransform::Multiply(viewMatrix, viewProjectionMatrix));
+
+
+	Vector3 ndcSegmentOrigin = Transform(localSegmentOrigin, worldViewProjectionSegmentOrigin);
+	Vector3 ndcSegmentDiff = Transform(localSegmentDiff, worldViewProjectionSegmentDiff);
+
+
+
+	Vector3 screenSegmentOrigin = Transform(ndcSegmentOrigin, viewportMatrix);
+	Vector3 screenSegmentDiff = Transform(ndcSegmentDiff, viewportMatrix);
+
+
+	Novice::DrawLine(
+		int(screenSegmentOrigin.x),
+		int(screenSegmentOrigin.y),
+		int(screenSegmentDiff.x),
+		int(screenSegmentDiff.y), color);
+
+
+}
+
 
 bool IsCollisionSpherePlane(const SpherePloperty s1, Plane plane) {
 	//kを求めたいんですよね・・
@@ -132,6 +166,46 @@ bool IsCollisionSpherePlane(const SpherePloperty s1, Plane plane) {
 		return false;
 	}
 }
+
+bool IsCollisionTriangleAndSegment(const Segment& segment, const Triangle& triangle) {
+
+
+	//上
+	Vector3 v0 = triangle.vertex2;
+	//右
+	Vector3 v1 = triangle.vertex3;
+	//左
+	Vector3 v2 = triangle.vertex1;
+
+
+
+	//それぞれを結ぶ
+	Vector3 v01 = Subtract(v1, v0);
+	Vector3 v12 = Subtract(v2, v1);
+	Vector3 v20 = Subtract(v0, v2);
+
+
+	Vector3 o = segment.origin;
+	Vector3 b = segment.diff;
+
+	Vector3 cross01 = Cross(v01, v1);
+	Vector3 cross12 = Cross(v12, v2);
+	Vector3 cross20 = Cross(v20, v0);
+
+	//02_02より
+	Vector3 normal = Normalize(cross01);
+	
+	if ((cross01.x * normal.x + cross01.y * normal.y + cross01.z * normal.z) >= 0.0f &&
+		(cross12.x * normal.x + cross12.y * normal.y + cross12.z * normal.z) >= 0.0f &&
+		(cross20.x * normal.x + cross20.y * normal.y + cross20.z * normal.z) >= 0.0f) {
+		return true;
+	}
+	else {
+		return false;
+	}
+
+}
+
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -167,6 +241,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector3 project = {};
 	Vector3 closestPoint = {};
 
+	//左下、上、右下
+	Triangle triangle = { {-1.0f,0.0f,0.0f},{0.0f,1.0f,0.0f},{1.0f,0.0f,0.0f} };
+
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -193,23 +271,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		unsigned int color = WHITE;
 
-		if (IsCollisionSpherePlane(sphere, planeCoodinate)) {
+		if (IsCollisionTriangleAndSegment(segment, triangle)) {
 			color = RED;
 		}
 		else {
 			color = WHITE;
 		}
+
 		///
 		/// ↑更新処理ここまで
 		///
 
 		DrawGrid(viewMatrix, projectionMatrix, viewportMatrix);
 
-		DrawSphere(sphere, projectionMatrix, viewportMatrix,viewMatrix, color);
 
-		//DrawSphere(Sphere2, projectionMatrix, viewportMatrix, viewMatrix, color);
+		DrawTriangle(triangle, viewMatrix, projectionMatrix, viewportMatrix, color);
 
-		DrawPlane(planeCoodinate, viewMatrix, projectionMatrix, viewportMatrix, WHITE);
+		DrawSegment(segment, viewMatrix, projectionMatrix, viewportMatrix, color);
+
 		///
 		/// ↓描画処理ここから
 		///
@@ -220,19 +299,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 		ImGui::End();
 
-		ImGui::Begin("Sphre1");
-		ImGui::DragFloat3("spherePos", &sphere.center.x, 0.1f);
 
-		ImGui::DragFloat("SphereRadius", &sphere.radius, 0.1f);
+		ImGui::Begin("Segment");
+		ImGui::DragFloat3("Origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("Diff", &segment.diff.x, 0.01f);
 		ImGui::End();
 
+		ImGui::Begin("Triangle");
+		ImGui::DragFloat3("v1", &triangle.vertex1.x, 0.01f);
+		ImGui::DragFloat3("v2", &triangle.vertex2.x, 0.01f);
+		ImGui::DragFloat3("v3", &triangle.vertex3.x, 0.01f);
 
-		ImGui::Begin("Plane");
-		ImGui::DragFloat3("Plane.Normal", &planeCoodinate.normal.x, 0.01f);
-		//planeCoodinate.normal = Normalize(planeCoodinate.normal);
-		ImGui::DragFloat("distance", &planeCoodinate.distance, 0.01f);
 		ImGui::End();
-
 
 	
 		///

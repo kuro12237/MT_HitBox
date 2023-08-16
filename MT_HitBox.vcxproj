@@ -103,6 +103,7 @@
     <ClCompile Include="3dModel\Grid.cpp" />
     <ClCompile Include="3dModel\Plane.cpp" />
     <ClCompile Include="3dModel\Sphre.cpp" />
+    <ClCompile Include="3dModel\Triangle.cpp" />
     <ClCompile Include="C:\KamataEngine\DirectXGame\base\DirectXCommon.cpp" />
     <ClCompile Include="C:\KamataEngine\DirectXGame\base\WinApp.cpp" />
     <ClCompile Include="C:\KamataEngine\DirectXGame\scene\GameScene.cpp" />
@@ -117,6 +118,7 @@
     <ClInclude Include="3dModel\Grid.h" />
     <ClInclude Include="3dModel\Plane.h" />
     <ClInclude Include="3dModel\Sphre.h" />
+    <ClInclude Include="3dModel\Triangle.h" />
     <ClInclude Include="C:\KamataEngine\DirectXGame\math\Matrix4x4.h" />
     <ClInclude Include="C:\KamataEngine\DirectXGame\math\Vector2.h" />
     <ClInclude Include="C:\KamataEngine\DirectXGame\math\Vector3.h" />
