@@ -197,7 +197,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			int(end.x),
 			int(end.y), WHITE);
 
-
 		//SegmentOrigin
 		Novice::DrawEllipse(
 			int(start.x),
