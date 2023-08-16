@@ -43,8 +43,7 @@ Vector3 Subtract(const Vector3 m1, const Vector3 m2) {
 //最近接点
 Vector3 ClosestPoint(const Vector3 point, const Segment segment) {
 
-	//Projectで省略してもよかったけど
-	//こっちの方が自分の為になると思った
+	
 	//A..PO
 	Vector3 Vector3A = Subtract(point, segment.origin);
 	Vector3 Vector3B = Subtract(segment.diff, segment.origin);
@@ -69,7 +68,7 @@ Vector3 ClosestPoint(const Vector3 point, const Segment segment) {
 
 Vector3 Project(const Vector3 a, const Vector3 b) {
 
-	//Aベクトルを正射影ベクトルにする
+
 	Vector3 Vector3C = {};
 
 	//bの長さを求める
