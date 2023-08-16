@@ -50,6 +50,9 @@
     <ClCompile Include="math\Vector\VectorTransform.cpp">
       <Filter>KamataEngine\Source</Filter>
     </ClCompile>
+    <ClCompile Include="3dModel\Plane.cpp">
+      <Filter>KamataEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\KamataEngine\DirectXGame\audio\Audio.h">
@@ -134,5 +137,6 @@
     <ClInclude Include="math\Vector\VectorTransform.h">
       <Filter>KamataEngine\Source</Filter>
     </ClInclude>
+    <ClInclude Include="3dModel\Plane.h" />
   </ItemGroup>
 </Project>

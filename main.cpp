@@ -2,6 +2,7 @@
 #include"3dModel/Grid.h"
 #include"3dModel/Sphre.h"
 #include"ImGuiManager.h"
+#include"3dModel/Plane.h"
 
 const char kWindowTitle[] = "LE2B_14_サカキバラ_イブキ";
 
@@ -106,6 +107,32 @@ bool IsCollision(const SpherePloperty v1, SpherePloperty v2) {
 
 }
 
+
+bool IsCollisionSpherePlane(const SpherePloperty s1, Plane plane) {
+	//kを求めたいんですよね・・
+
+	//q=c-kn
+	////球の中心点
+	Vector3 c = s1.center;
+
+	float d = plane.distance;
+
+	//単位ベクトル
+	Vector3 n = Normalize(plane.normal);
+
+	float dot = n.x * c.x + n.y * c.y + n.z + c.z;
+
+
+	float k = abs(dot - d);
+
+	if (k < s1.radius) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -129,6 +156,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	SpherePloperty Sphere2 = { SpherePos,2.0f };
 
+
+	Plane planeCoodinate = { {0.0f,1.0f,0.001f},0.0f };
 
 	const int WINDOW_SIZE_WIDTH = 1280;
 	const int WINDOW_SIZE_HEIGHT = 720;
@@ -164,10 +193,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		unsigned int color = WHITE;
 
-		if (IsCollision(sphere,Sphere2 )) {
+		if (IsCollisionSpherePlane(sphere, planeCoodinate) == true) {
 			color = RED;
 		}
-	
+		else {
+			color = WHITE;
+		}
 		///
 		/// ↑更新処理ここまで
 		///
@@ -176,8 +207,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawSphere(sphere, projectionMatrix, viewportMatrix,viewMatrix, color);
 
-		DrawSphere(Sphere2, projectionMatrix, viewportMatrix, viewMatrix, color);
+		//DrawSphere(Sphere2, projectionMatrix, viewportMatrix, viewMatrix, color);
 
+		DrawPlane(planeCoodinate, viewMatrix, projectionMatrix, viewportMatrix, WHITE);
 		///
 		/// ↓描画処理ここから
 		///
@@ -195,12 +227,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::End();
 
 
-		ImGui::Begin("Sphre2");
-		ImGui::DragFloat3("spherePos", &Sphere2.center.x, 0.1f);
-
-		ImGui::DragFloat("SphereRadius", &Sphere2.radius, 0.1f);
+		ImGui::Begin("Plane");
+		ImGui::DragFloat3("Plane.Normal", &planeCoodinate.normal.x, 0.01f);
+		//planeCoodinate.normal = Normalize(planeCoodinate.normal);
+		ImGui::DragFloat("distance", &planeCoodinate.distance, 0.01f);
 		ImGui::End();
 
+
+	
 		///
 		/// ↑描画処理ここまで
 		///
