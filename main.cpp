@@ -270,6 +270,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		DrawGrid(viewMatrix, projectionMatrix, viewportMatrix);
 
 
+
 		//DrawSphere(Sphere2, projectionMatrix, viewportMatrix, viewMatrix, color);
 		DrawSegment(segment, viewMatrix, projectionMatrix, viewportMatrix, color);
 
