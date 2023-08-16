@@ -143,8 +143,7 @@ void DrawSegment(const Segment& segment, const Matrix4x4& viewMatrix, const Matr
 
 
 bool IsCollisionSpherePlane(const SpherePloperty s1, Plane plane) {
-	//kを求めたいんですよね・・
-
+	
 	//q=c-kn
 	////球の中心点
 	Vector3 c = s1.center;
