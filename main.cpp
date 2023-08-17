@@ -219,6 +219,27 @@ bool IsCollisionCube(const CubePloperty& cube1, const CubePloperty& cube2) {
 
 }
 
+bool IsCollisionSphereCube(const SpherePloperty& sphere, const CubePloperty& cube) {
+	//一番近い頂点
+	const Vector3 closestPoint = {
+		std::clamp(sphere.center.x,cube.min.x,cube.max.x),
+		std::clamp(sphere.center.y,cube.min.y,cube.max.y),
+	    std::clamp(sphere.center.z,cube.min.z,cube.max.z)
+	};
+
+	
+	float distance = Length(Subtract(closestPoint, sphere.center));
+
+	if (distance <= sphere.radius) {
+		return true;
+	}
+	else {
+		return false;
+	}
+
+
+}
+
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -286,10 +307,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		unsigned int color = WHITE;
 
-		if (IsCollisionCube(Cube1, Cube2)) {
+		if (IsCollisionSphereCube(sphere,Cube1))
+		{
 			color = RED;
 		}
-	
 
 		///
 		/// ↑更新処理ここまで
@@ -301,7 +322,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//1個目
 		DrawCube(Cube1, viewMatrix, projectionMatrix, viewportMatrix, color);
 	
-		DrawSphere(sphere, viewMatrix, projectionMatrix, viewportMatrix, color);
+		DrawSphere(sphere, projectionMatrix, viewportMatrix, viewMatrix, color);
 
 
 		///
