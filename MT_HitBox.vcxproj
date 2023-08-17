@@ -100,6 +100,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="3dModel\Cube.cpp" />
     <ClCompile Include="3dModel\Grid.cpp" />
     <ClCompile Include="3dModel\Plane.cpp" />
     <ClCompile Include="3dModel\Sphre.cpp" />
@@ -115,6 +116,7 @@
     <ClCompile Include="math\Vector\VectorTransform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="3dModel\Cube.h" />
     <ClInclude Include="3dModel\Grid.h" />
     <ClInclude Include="3dModel\Plane.h" />
     <ClInclude Include="3dModel\Sphre.h" />

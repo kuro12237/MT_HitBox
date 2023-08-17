@@ -4,6 +4,7 @@
 #include"ImGuiManager.h"
 #include"3dModel/Plane.h"
 #include"3dModel/Triangle.h"
+#include"3dModel/Cube.h"
 const char kWindowTitle[] = "LE2B_14_サカキバラ_イブキ";
 
 struct Segment {
@@ -203,7 +204,20 @@ bool IsCollisionTriangleAndSegment(const Segment& segment, const Triangle& trian
 	}
 
 }
+bool IsCollisionCube(const CubePloperty& cube1, const CubePloperty& cube2) {
 
+	//当たったらtrue
+	if ((cube1.min.x <= cube2.max.x && cube1.max.x >= cube2.min.x) &&
+		(cube1.min.y <= cube2.max.y && cube1.max.y >= cube2.min.y) &&
+		(cube1.min.z <= cube2.max.z && cube1.max.z >= cube2.min.z)) {
+		return true;
+	}
+	else {
+		return false;
+	}
+
+
+}
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -243,6 +257,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Triangle triangle = { {-1.0f,0.0f,0.0f},{0.0f,1.0f,0.0f},{1.0f,0.0f,0.0f} };
 
 
+    CubePloperty Cube1 = { .min{-0.5f,-0.5f,-0.5f},.max{0.0f,0.0f,0.1f} };
+	CubePloperty Cube2 = { .min{-0.2f,-0.2f,-0.2f},.max{1.0f,1.0f,1.0f} };
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -269,12 +286,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		unsigned int color = WHITE;
 
-		if (IsCollisionTriangleAndSegment(segment, triangle)) {
+		if (IsCollisionCube(Cube1, Cube2)) {
 			color = RED;
 		}
-		else {
-			color = WHITE;
-		}
+	
 
 		///
 		/// ↑更新処理ここまで
@@ -283,9 +298,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		DrawGrid(viewMatrix, projectionMatrix, viewportMatrix);
 
 
-		DrawTriangle(triangle, viewMatrix, projectionMatrix, viewportMatrix, color);
+		//1個目
+		DrawCube(Cube1, viewMatrix, projectionMatrix, viewportMatrix, color);
+		//2個目
+		DrawCube(Cube2, viewMatrix, projectionMatrix, viewportMatrix, color);
 
-		DrawSegment(segment, viewMatrix, projectionMatrix, viewportMatrix, color);
 
 		///
 		/// ↓描画処理ここから
@@ -297,20 +314,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 		ImGui::End();
 
-
-		ImGui::Begin("Segment");
-		ImGui::DragFloat3("Origin", &segment.origin.x, 0.01f);
-		ImGui::DragFloat3("Diff", &segment.diff.x, 0.01f);
-		ImGui::End();
-
-		ImGui::Begin("Triangle");
-		ImGui::DragFloat3("v1", &triangle.vertex1.x, 0.01f);
-		ImGui::DragFloat3("v2", &triangle.vertex2.x, 0.01f);
-		ImGui::DragFloat3("v3", &triangle.vertex3.x, 0.01f);
+		ImGui::Begin("Cube1");
+		ImGui::DragFloat3("aabb1Max", &Cube1.max.x, 0.01f);
+		ImGui::DragFloat3("aabb1Min", &Cube1.min.x, 0.01f);
 
 		ImGui::End();
 
-	
+		ImGui::Begin("Cube2");
+		ImGui::DragFloat3("aabb2Max", &Cube2.max.x, 0.01f);
+		ImGui::DragFloat3("aabb2Min", &Cube2.min.x, 0.01f);
+
+		ImGui::End();
+
 		///
 		/// ↑描画処理ここまで
 		///
