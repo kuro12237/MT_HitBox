@@ -300,8 +300,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//1個目
 		DrawCube(Cube1, viewMatrix, projectionMatrix, viewportMatrix, color);
-		//2個目
-		DrawCube(Cube2, viewMatrix, projectionMatrix, viewportMatrix, color);
+	
+		DrawSphere(sphere, viewMatrix, projectionMatrix, viewportMatrix, color);
 
 
 		///
@@ -320,12 +320,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		ImGui::End();
 
-		ImGui::Begin("Cube2");
-		ImGui::DragFloat3("aabb2Max", &Cube2.max.x, 0.01f);
-		ImGui::DragFloat3("aabb2Min", &Cube2.min.x, 0.01f);
-
+	
+		ImGui::Begin("Sphere");
+		ImGui::DragFloat3("center", &sphere.center.x, 0.01f);
+		ImGui::DragFloat("radius", &sphere.radius, 0.01f);
 		ImGui::End();
-
 		///
 		/// ↑描画処理ここまで
 		///

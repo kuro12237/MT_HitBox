@@ -20,9 +20,6 @@ void DrawSphere(const SpherePloperty& sphere, const Matrix4x4& viewProjectionMat
 		for (uint32_t lonIndex = 0; lonIndex < SUBDIVISION; ++lonIndex) {
 			float lon = lonIndex * LON_EVERY;
 
-			//world座標でのabcを求める
-			//acはxz平面(phi,lon)
-			//abがxy平面(theta,lat)
 			Vector3 a, b, c;
 
 			//Local
@@ -39,7 +36,8 @@ void DrawSphere(const SpherePloperty& sphere, const Matrix4x4& viewProjectionMat
 			Matrix4x4 WorldMatrixC = MatrixTransform::MakeAffineMatrix({ 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, sphere.center);
 
 
-			////ワールドへ
+			////world
+
 
 			Matrix4x4 worldViewProjectionMatrixA = MatrixTransform::Multiply(WorldMatrixA, MatrixTransform::Multiply(viewMatrix, viewProjectionMatrix));
 			Matrix4x4 worldViewProjectionMatrixB = MatrixTransform::Multiply(WorldMatrixB, MatrixTransform::Multiply(viewMatrix, viewProjectionMatrix));
